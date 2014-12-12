@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>2fb10b8e-c409-457b-9565-5af9e507cd11</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>GeometryConversions.Wkb</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Spatial\SystemSpatialConverter.ReadGeometry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Spatial\SystemSpatialConverter.CreateGeography.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Spatial\SystemSpatialConverter.CreateGeometry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Spatial\SystemSpatialExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Spatial\SystemSpatialConverter.ReadGeography.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Wkb\WkbConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Wkb\WkbConverter.Read.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Wkb\WkbConverter.Write.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Wkb\WkbExtensions.cs" />
+  </ItemGroup>
+</Project>
