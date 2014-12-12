@@ -30,9 +30,17 @@ namespace GeometryConversions.SystemSpatial
 			{
 				return ReadGeometryMultiLineString((System.Spatial.GeometryMultiLineString)geometry, sr);
 			}
-			
+			if (geometry is System.Spatial.GeometryPolygon)
+			{
+				return ReadGeometryPolygon((System.Spatial.GeometryPolygon)geometry, sr);
+			}
+			if (geometry is System.Spatial.GeometryMultiPolygon)
+			{
+				return ReadGeometryMultiPolygon((System.Spatial.GeometryMultiPolygon)geometry, sr);
+			}
 			throw new NotImplementedException();
 		}
+		
 		private Esri.ArcGISRuntime.Geometry.MapPoint ReadGeometryPoint(System.Spatial.GeometryPoint p, Esri.ArcGISRuntime.Geometry.SpatialReference sr)
 		{
 			return new Esri.ArcGISRuntime.Geometry.MapPoint(p.X, p.Y,
