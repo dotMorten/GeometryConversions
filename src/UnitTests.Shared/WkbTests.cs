@@ -47,10 +47,11 @@ namespace UnitTests
 		[TestMethod]
 		public void WkbConvertMapPointToFromXYM()
 		{
-			MapPoint mp = new MapPoint(12, 34, double.NaN, 56);
+			MapPoint mp = new MapPoint(12, 34, double.NaN, 56, SpatialReferences.Wgs84);
 			byte[] bytes = mp.ToWellKnownBinary();
-			var geom = bytes.FromWellKnownBinary();
+			var geom = bytes.FromWellKnownBinary(mp.SpatialReference);
 			Assert.IsNotNull(geom);
+			Assert.AreEqual(SpatialReferences.Wgs84, geom.SpatialReference);
 			Assert.IsInstanceOfType(geom, typeof(MapPoint));
 			var mp2 = (MapPoint)geom;
 			Assert.AreEqual(12, mp2.X);

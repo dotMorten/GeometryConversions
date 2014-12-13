@@ -23,14 +23,14 @@ namespace GeometryConversions.Wkb
 			return new WkbConverter().WriteWellKnownBinary(geometry, outputStream);
 		}
 
-		public static Geometry FromWellKnownBinary(this byte[] data)
+		public static Geometry FromWellKnownBinary(this byte[] data, SpatialReference spatialReference = null)
 		{
-			return new WkbConverter().Read(data);
+			return new WkbConverter().Read(data, spatialReference);
 		}
 
-		public static Geometry ReadWellKnownBinary(this Stream inputStream)
+		public static Geometry ReadWellKnownBinary(this Stream inputStream, SpatialReference spatialReference = null)
 		{
-			return new WkbConverter().Read(inputStream);
+			return new WkbConverter().Read(inputStream, spatialReference);
 		}
     }
 }

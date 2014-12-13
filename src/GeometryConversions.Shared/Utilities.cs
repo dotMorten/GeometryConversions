@@ -83,5 +83,18 @@ namespace GeometryConversions
 			else // CCW if area is positive
 				return (cross > 0.0);
 		}
+
+		internal static IEnumerable<int> CountEnumerator(int count)
+		{
+			return CountEnumerator(0, count);
+		}
+
+		internal static IEnumerable<int> CountEnumerator(int start, int count)
+		{
+			for (int i = start; i < count; i++)
+			{
+				yield return i;
+			}
+		}
     }
 }

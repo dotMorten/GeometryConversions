@@ -11,6 +11,8 @@ namespace GeometryConversions.SqlServer
 		{
 			if (geometry == null)
 				throw new ArgumentNullException("geometry");
+			if (geometry.SpatialReference == null)
+				throw new ArgumentException("Spatial reference cannot be null when converting to Geography types");
 			int cs = 0;
 			if (geometry.SpatialReference != null)
 			{
@@ -24,6 +26,8 @@ namespace GeometryConversions.SqlServer
 				{
 					cs = geometry.SpatialReference.Wkid;
 				}
+				else
+					throw new ArgumentException("Unsupported geographic coordinate system");
 			}
 			if (geometry is Esri.ArcGISRuntime.Geometry.MapPoint)
 				return CreateGeographyPoint((Esri.ArcGISRuntime.Geometry.MapPoint)geometry, cs);
@@ -54,11 +58,11 @@ namespace GeometryConversions.SqlServer
 				return Microsoft.SqlServer.Types.SqlGeography.Point(p.Y, p.X, cs);
 
 			var b = new Microsoft.SqlServer.Types.SqlGeographyBuilder();
-			if (cs > 0)
-				b.SetSrid(cs);
+			b.SetSrid(cs);
 			b.BeginGeography(Microsoft.SqlServer.Types.OpenGisGeographyType.Point);
 			b.BeginFigure(p.Y, p.X, p.HasZ ? (double?)p.Z : null,
 					p.HasM ? (double?)p.M : null);
+			b.EndFigure();
 			b.EndGeography();
 			return b.ConstructedGeography;
 		}
@@ -66,8 +70,7 @@ namespace GeometryConversions.SqlServer
 		private static Microsoft.SqlServer.Types.SqlGeography CreateGeographyMultipoint(Esri.ArcGISRuntime.Geometry.Multipoint multipoint, int cs)
 		{
 			var b = new Microsoft.SqlServer.Types.SqlGeographyBuilder();
-			if (cs > 0)
-				b.SetSrid(cs);
+			b.SetSrid(cs);
 			b.BeginGeography(Microsoft.SqlServer.Types.OpenGisGeographyType.MultiPoint);
 
 			foreach (var p in multipoint.Points)
@@ -86,8 +89,7 @@ namespace GeometryConversions.SqlServer
 		private static Microsoft.SqlServer.Types.SqlGeography CreateGeographyLineString(Esri.ArcGISRuntime.Geometry.Polyline polyline, int cs)
 		{
 			var b = new Microsoft.SqlServer.Types.SqlGeographyBuilder();
-			if (cs > 0)
-				b.SetSrid(cs);
+			b.SetSrid(cs);
 			b.BeginGeography(
 				polyline.Parts.Count <= 1 ?
 				Microsoft.SqlServer.Types.OpenGisGeographyType.LineString :
@@ -102,8 +104,7 @@ namespace GeometryConversions.SqlServer
 		private static Microsoft.SqlServer.Types.SqlGeography CreateGeographyPolygon(Esri.ArcGISRuntime.Geometry.Polygon polygon, int cs)
 		{
 			var b = new Microsoft.SqlServer.Types.SqlGeographyBuilder();
-			if (cs > 0)
-				b.SetSrid(cs);
+			b.SetSrid(cs);
 
 			var rings = Utilities.SplitMultiPolygon(polygon).ToList();
 

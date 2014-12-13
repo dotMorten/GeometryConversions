@@ -8,12 +8,12 @@ namespace GeometryConversions.Wkb
 {
     internal partial class WkbConverter
     {
-		public Geometry Read(byte[] bytes)
+		internal Geometry Read(byte[] bytes, SpatialReference spatialReference)
 		{
 			// Create a memory inputStream using the supplied byte array.
 			using (MemoryStream ms = new MemoryStream(bytes))
 			{
-				return Read(ms);
+				return Read(ms, spatialReference);
 			}
 		}
 
@@ -22,17 +22,17 @@ namespace GeometryConversions.Wkb
 		/// </summary>
 		/// <param name="reader">BinaryReader</param>
 		/// <returns>A <see cref="Geometry"/> based on the Well-known binary representation.</returns>
-		public Geometry Read(Stream stream)
+		internal Geometry Read(Stream stream, SpatialReference spatialReference)
 		{
 			// Create a new binary reader
 			using (BinaryReader reader = new BinaryReader(stream))
 			{
 				// Call the main create function.
-				return Read(reader);
+				return Read(reader, spatialReference);
 			}
 		}
 
-		private Geometry Read(BinaryReader reader)
+		private Geometry Read(BinaryReader reader, SpatialReference spatialReference)
 		{
 			// Get the first byte in the array.  This specifies if the WKB is in
 			// XDR (big-endian) format of NDR (little-endian) format.
@@ -58,37 +58,37 @@ namespace GeometryConversions.Wkb
 				case WkbGeometryType.wkbPointZ:
 				case WkbGeometryType.wkbPointM:
 				case WkbGeometryType.wkbPointZM:
-					return ReadWkbPoint(reader, (WkbByteOrder)byteOrder, wkbtype);
+					return ReadWkbPoint(reader, (WkbByteOrder)byteOrder, wkbtype, spatialReference);
 
 				case WkbGeometryType.wkbLineString:
 				case WkbGeometryType.wkbLineStringZ:
 				case WkbGeometryType.wkbLineStringM:
 				case WkbGeometryType.wkbLineStringZM:
-					return ReadWkbLineString(reader, (WkbByteOrder)byteOrder, wkbtype);
+					return ReadWkbLineString(reader, (WkbByteOrder)byteOrder, wkbtype, spatialReference);
 
 				case WkbGeometryType.wkbPolygon:
 				case WkbGeometryType.wkbPolygonZ:
 				case WkbGeometryType.wkbPolygonM:
 				case WkbGeometryType.wkbPolygonZM:
-					return ReadWkbPolygon(reader, (WkbByteOrder)byteOrder, wkbtype);
+					return ReadWkbPolygon(reader, (WkbByteOrder)byteOrder, wkbtype, spatialReference);
 
 				case WkbGeometryType.wkbMultiPoint:
 				case WkbGeometryType.wkbMultiPointZ:
 				case WkbGeometryType.wkbMultiPointM:
 				case WkbGeometryType.wkbMultiPointZM:
-					return ReadWkbMultiPoint(reader, (WkbByteOrder)byteOrder, wkbtype);
+					return ReadWkbMultiPoint(reader, (WkbByteOrder)byteOrder, wkbtype, spatialReference);
 
 				case WkbGeometryType.wkbMultiLineString:
 				case WkbGeometryType.wkbMultiLineStringZ:
 				case WkbGeometryType.wkbMultiLineStringM:
 				case WkbGeometryType.wkbMultiLineStringZM:
-					return ReadWkbMultiLineString(reader, (WkbByteOrder)byteOrder, wkbtype);
+					return ReadWkbMultiLineString(reader, (WkbByteOrder)byteOrder, wkbtype, spatialReference);
 
 				case WkbGeometryType.wkbMultiPolygon:
 				case WkbGeometryType.wkbMultiPolygonZ:
 				case WkbGeometryType.wkbMultiPolygonM:
 				case WkbGeometryType.wkbMultiPolygonZM:
-					return ReadWkbMultiPolygon(reader, (WkbByteOrder)byteOrder, wkbtype);
+					return ReadWkbMultiPolygon(reader, (WkbByteOrder)byteOrder, wkbtype, spatialReference);
 
 				case WkbGeometryType.wkbGeometryCollection:
 				case WkbGeometryType.wkbGeometryCollectionZ:
@@ -103,13 +103,13 @@ namespace GeometryConversions.Wkb
 		}
 
 		
-		private MapPoint ReadWkbPoint(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type)
+		private MapPoint ReadWkbPoint(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
 		{
 			// Create and return the point.
-			return ReadCoordinate(reader, byteOrder, type);
+			return ReadCoordinate(reader, byteOrder, type, spatialReference);
 		}
 
-		private IEnumerable<MapPoint> ReadCoordinates(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type)
+		private IEnumerable<MapPoint> ReadCoordinates(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
 		{
 			// Get the number of points in this linestring.
 			int numPoints = (int)readUInt32(reader, byteOrder);
@@ -117,47 +117,37 @@ namespace GeometryConversions.Wkb
 			// Loop on the number of points in the ring.
 			for (int i = 0; i < numPoints; i++)
 			{
-				yield return ReadCoordinate(reader, byteOrder, type);
+				yield return ReadCoordinate(reader, byteOrder, type, null);
 			}
 		}
 
-		private MapPoint ReadCoordinate(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type)
+		private MapPoint ReadCoordinate(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
 		{
 			double X = readDouble(reader, byteOrder);
 			double Y = readDouble(reader, byteOrder);
 			double Z = ((uint)type > 1000 && (uint)type < 2000 || (int)type > 3000) ? readDouble(reader, byteOrder) : double.NaN;
 			double M = ((uint)type > 2000) ? readDouble(reader, byteOrder) : double.NaN;
-			return new MapPoint(X,Y,Z,M);
+			return new MapPoint(X, Y, Z, M, spatialReference);
 		}
 
-		private Polyline ReadWkbLineString(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type)
+		private Polyline ReadWkbLineString(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
 		{
-			return new Polyline(ReadCoordinates(reader, byteOrder, type));
+			return new Polyline(ReadCoordinates(reader, byteOrder, type, null), spatialReference);
 		}
 
-		//private IEnumerable<MapPoint> ReadWkbLinearRing(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type)
-		//{
-		//	CoordinateCollection l = new CoordinateCollection();
-		//	l.AddRange(ReadCoordinates(reader, byteOrder, type));			
-		//	//if polygon isn't closed, add the first point to the end (this shouldn't occur for correct WKB data)
-		//	if (l[0].X != l[l.Count - 1].X || l[0].Y != l[l.Count - 1].Y)
-		//		l.Add(new Coordinate(l[0].X, l[0].Y, l[0].Z, l[0].M));
-		//	return l;
-		//}
-
-		private Polygon ReadWkbPolygon(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type)
+		private Polygon ReadWkbPolygon(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
 		{
 			// Get the Number of rings in this Polygon.
 			int numRings = (int)readUInt32(reader, byteOrder);
-			return new Polygon(CoordinateCollectionEnumerator(numRings + 1, reader, byteOrder, type));
+			return new Polygon(CoordinateCollectionEnumerator(numRings + 1, reader, byteOrder, type, null), spatialReference);
 			
 		}
-		IEnumerable<IEnumerable<MapPoint>> CoordinateCollectionEnumerator(int count, BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type)
+		IEnumerable<IEnumerable<MapPoint>> CoordinateCollectionEnumerator(int count, BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
 		{
 			for(int i=0;i<count;i++)
-				yield return ReadCoordinates(reader,byteOrder,type);
+				yield return ReadCoordinates(reader, byteOrder, type, spatialReference);
 		}
-		private Multipoint ReadWkbMultiPoint(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type)
+		private Multipoint ReadWkbMultiPoint(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
 		{
 			// Get the number of points in this multipoint.
 			int numPoints = (int)readUInt32(reader, byteOrder);
@@ -175,13 +165,13 @@ namespace GeometryConversions.Wkb
 				// TODO: Validate type
 
 				// Create the next point and add it to the point array.
-				points.Add(ReadWkbPoint(reader, byteOrder, type));
+				points.Add(ReadWkbPoint(reader, byteOrder, type, null));
 			}
-			return new Multipoint(points);
+			return new Multipoint(points, spatialReference);
 			
 		}
 
-		private Polyline ReadWkbMultiLineString(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type)
+		private Polyline ReadWkbMultiLineString(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
 		{
 			// Get the number of linestrings in this multilinestring.
 			int numLineStrings = (int)readUInt32(reader, byteOrder);
@@ -198,15 +188,15 @@ namespace GeometryConversions.Wkb
 				//readUInt32(reader, byteOrder);
 
 				// Create the next linestring and add it to the array.
-				mline.Add(ReadCoordinates(reader, byteOrder, type));
+				mline.Add(ReadCoordinates(reader, byteOrder, type, null));
 			}
 
 			// Create and return the MultiLineString.
-			return new Polyline(mline);
+			return new Polyline(mline, spatialReference);
 			
 		}
 
-		private Polygon ReadWkbMultiPolygon(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type)
+		private Polygon ReadWkbMultiPolygon(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
 		{
 			// Get the number of Polygons.
 			int numPolygons = (int)readUInt32(reader, byteOrder);
@@ -224,7 +214,7 @@ namespace GeometryConversions.Wkb
 				// TODO: Validate type
 
 				int numRings = (int)readUInt32(reader, byteOrder);
-				rings.AddRange(CoordinateCollectionEnumerator(numRings + 1, reader, byteOrder, type));
+				rings.AddRange(CoordinateCollectionEnumerator(numRings + 1, reader, byteOrder, type, spatialReference));
 			}
 
 			//Create and return the MultiPolygon.

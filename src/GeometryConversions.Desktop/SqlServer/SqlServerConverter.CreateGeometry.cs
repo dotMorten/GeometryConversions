@@ -43,11 +43,11 @@ namespace GeometryConversions.SqlServer
 				return Microsoft.SqlServer.Types.SqlGeometry.Point(p.X, p.Y, cs);
 
 			var b = new Microsoft.SqlServer.Types.SqlGeometryBuilder();
-			if(cs > 0)
-				b.SetSrid(cs);
+			b.SetSrid(cs);
 			b.BeginGeometry(Microsoft.SqlServer.Types.OpenGisGeometryType.Point);
 			b.BeginFigure(p.X, p.Y, p.HasZ ? (double?)p.Z : null,
 					p.HasM ? (double?)p.M : null);
+			b.EndFigure();
 			b.EndGeometry();
 			return b.ConstructedGeometry;
 		}
@@ -55,8 +55,7 @@ namespace GeometryConversions.SqlServer
 		private static Microsoft.SqlServer.Types.SqlGeometry CreateGeometryMultipoint(Esri.ArcGISRuntime.Geometry.Multipoint multipoint, int cs)
 		{
 			var b = new Microsoft.SqlServer.Types.SqlGeometryBuilder();
-			if (cs > 0)
-				b.SetSrid(cs);
+			b.SetSrid(cs);
 			b.BeginGeometry(Microsoft.SqlServer.Types.OpenGisGeometryType.MultiPoint);
 
 			foreach (var p in multipoint.Points)
@@ -74,8 +73,7 @@ namespace GeometryConversions.SqlServer
 		private static Microsoft.SqlServer.Types.SqlGeometry CreateGeometryLineString(Esri.ArcGISRuntime.Geometry.Polyline polyline, int cs)
 		{
 			var b = new Microsoft.SqlServer.Types.SqlGeometryBuilder();
-			if (cs > 0)
-				b.SetSrid(cs);
+			b.SetSrid(cs);
 			b.BeginGeometry(
 				polyline.Parts.Count <= 1 ?
 				Microsoft.SqlServer.Types.OpenGisGeometryType.LineString :
@@ -90,8 +88,7 @@ namespace GeometryConversions.SqlServer
 		private static Microsoft.SqlServer.Types.SqlGeometry CreateGeometryPolygon(Esri.ArcGISRuntime.Geometry.Polygon polygon, int cs)
 		{
 			var b = new Microsoft.SqlServer.Types.SqlGeometryBuilder();
-			if (cs > 0)
-				b.SetSrid(cs);
+			b.SetSrid(cs);
 
 			var rings = Utilities.SplitMultiPolygon(polygon).ToList();
 

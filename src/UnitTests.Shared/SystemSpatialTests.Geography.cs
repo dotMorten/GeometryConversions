@@ -18,7 +18,7 @@ namespace UnitTests
 	public class SystemSpatialGeographyTests
 	{
 		[TestMethod]
-		public void SystemSpatialConvertMapPointToXY()
+		public void SystemSpatialGeographyConvertMapPointToXY()
 		{
 			MapPoint mp = new MapPoint(12, 34, SpatialReferences.Wgs84);
 			var g = mp.ToSystemSpatialGeography();
@@ -40,7 +40,7 @@ namespace UnitTests
 		}
 
 		[TestMethod]
-		public void SystemSpatialConvertMultipointToXY()
+		public void SystemSpatialGeographyConvertMultipointToXY()
 		{
 			var mp = new Multipoint(new MapPoint[] { new MapPoint(12, 34), new MapPoint(12, 34, 56) }, SpatialReferences.WebMercator);
 			var g = mp.ToSystemSpatialGeography();
@@ -52,7 +52,7 @@ namespace UnitTests
 		}
 
 		[TestMethod]
-		public void SystemSpatialConvertPolylineToLineString()
+		public void SystemSpatialGeographyConvertPolylineToLineString()
 		{
 			PolylineBuilder pb = new PolylineBuilder(SpatialReferences.Wgs84);
 			pb.AddPart(new MapPoint[] { new MapPoint(56, 67), new MapPoint(78, 89), new MapPoint(90, 10) });
@@ -66,7 +66,7 @@ namespace UnitTests
 		}
 
 		[TestMethod]
-		public void SystemSpatialConvertPolylineToMultiLineString()
+		public void SystemSpatialGeographyConvertPolylineToMultiLineString()
 		{
 			PolylineBuilder pb = new PolylineBuilder(SpatialReferences.Wgs84);
 			pb.AddPart(new MapPoint[] { new MapPoint(12, 34), new MapPoint(12, 44) });
@@ -84,7 +84,7 @@ namespace UnitTests
 
 
 		[TestMethod]
-		public void SystemSpatialConvertPolygonToPolygon()
+		public void SystemSpatialGeographyConvertPolygonToPolygon()
 		{
 			PolygonBuilder pb = new PolygonBuilder(SpatialReferences.Wgs84);
 			pb.AddPart(new MapPoint[] { new MapPoint(56, 67), new MapPoint(90, 10), new MapPoint(78, 89) });
@@ -99,7 +99,7 @@ namespace UnitTests
 		}
 
 		[TestMethod]
-		public void SystemSpatialConvertPolygonToMultiPolygon()
+		public void SystemSpatialGeographyConvertPolygonToMultiPolygon()
 		{
 			PolygonBuilder pb = new PolygonBuilder(SpatialReferences.Wgs84);
 			pb.AddPart(new MapPoint[] { new MapPoint(0, 0), new MapPoint(1, 0), new MapPoint(1, 1) });

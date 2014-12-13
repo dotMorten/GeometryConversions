@@ -18,7 +18,7 @@ namespace UnitTests
 	public class SystemSpatialGeometryTests
 	{
 		[TestMethod]
-		public void SystemSpatialConvertMapPointToXY()
+		public void SystemSpatialGeometryConvertMapPointToXY()
 		{
 			MapPoint mp = new MapPoint(12, 34, SpatialReferences.Wgs84);
 			var g = mp.ToSystemSpatialGeometry();
@@ -30,17 +30,10 @@ namespace UnitTests
 			Assert.IsNull(p.Z);
 			Assert.IsNull(p.M);
 			Assert.AreEqual(SpatialReferences.Wgs84.Wkid, p.CoordinateSystem.EpsgId);
-			//var fmtr = System.Spatial.GmlFormatter.Create();
-			//System.IO.MemoryStream ms = new System.IO.MemoryStream();
-			//var xw = System.Xml.XmlWriter.Create(ms);
-			//fmtr.Write(p, xw);
-			//xw.Flush();
-			//var gml = Encoding.UTF8.GetString(ms.ToArray());
-			//var json = System.Spatial.GeoJsonObjectFormatter.Create().Write(p);
 		}
 
 		[TestMethod]
-		public void SystemSpatialConvertMultipointToXY()
+		public void SystemSpatialGeometryConvertMultipointToXY()
 		{
 			var mp = new Multipoint(new MapPoint[] { new MapPoint(12, 34), new MapPoint(12, 34, 56) }, SpatialReferences.WebMercator);
 			var g = mp.ToSystemSpatialGeometry();
@@ -52,7 +45,7 @@ namespace UnitTests
 		}
 
 		[TestMethod]
-		public void SystemSpatialConvertPolylineToLineString()
+		public void SystemSpatialGeometryConvertPolylineToLineString()
 		{
 			PolylineBuilder pb = new PolylineBuilder(SpatialReferences.Wgs84);
 			pb.AddPart(new MapPoint[] { new MapPoint(56, 67), new MapPoint(78, 89), new MapPoint(90, 10) });
@@ -66,7 +59,7 @@ namespace UnitTests
 		}
 
 		[TestMethod]
-		public void SystemSpatialConvertPolylineToMultiLineString()
+		public void SystemSpatialGeometryConvertPolylineToMultiLineString()
 		{
 			PolylineBuilder pb = new PolylineBuilder(SpatialReferences.Wgs84);
 			pb.AddPart(new MapPoint[] { new MapPoint(12, 34), new MapPoint(12, 44) });
@@ -84,7 +77,7 @@ namespace UnitTests
 
 
 		[TestMethod]
-		public void SystemSpatialConvertPolygonToPolygon()
+		public void SystemSpatialGeometryConvertPolygonToPolygon()
 		{
 			PolygonBuilder pb = new PolygonBuilder(SpatialReferences.Wgs84);
 			pb.AddPart(new MapPoint[] { new MapPoint(56, 67), new MapPoint(90, 10), new MapPoint(78, 89) });
@@ -99,7 +92,7 @@ namespace UnitTests
 		}
 
 		[TestMethod]
-		public void SystemSpatialConvertPolygonToMultiPolygon()
+		public void SystemSpatialGeometryConvertPolygonToMultiPolygon()
 		{
 			PolygonBuilder pb = new PolygonBuilder(SpatialReferences.Wgs84);
 			pb.AddPart(new MapPoint[] { new MapPoint(0, 0), new MapPoint(1, 0), new MapPoint(1, 1) });
