@@ -26,15 +26,18 @@ namespace GeometryConversions
 			foreach (var ring in innerRings)
 			{
 				var inner = new Polygon(ring);
+				bool outerRingFound = false;
 				foreach (var outerRing in outerRings)
 				{
 					if (GeometryEngine.Within(inner, new Polygon(outerRing.Item1)))
 					{
 						outerRing.Item2.Add(ring);
+						outerRingFound = true;
 						break;
 					}
 				}
-				throw new System.IO.InvalidDataException("Ring orientations are wrong - please simplify geometry first");
+				if(!outerRingFound)
+					throw new System.IO.InvalidDataException("Ring orientations are wrong - please simplify geometry first");
 			}
 			return outerRings;
 		}
