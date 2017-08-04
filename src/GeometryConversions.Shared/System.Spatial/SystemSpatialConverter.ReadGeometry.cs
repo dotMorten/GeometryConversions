@@ -42,11 +42,19 @@ namespace GeometryConversions.SystemSpatial
 		}
 		
 		private Esri.ArcGISRuntime.Geometry.MapPoint ReadGeometryPoint(System.Spatial.GeometryPoint p, Esri.ArcGISRuntime.Geometry.SpatialReference sr)
-		{
-			return new Esri.ArcGISRuntime.Geometry.MapPoint(p.X, p.Y,
-				p.Z.HasValue ? p.Z.Value : double.NaN,
-				p.M.HasValue ? p.M.Value : double.NaN, sr);
-		}
+        {
+            if (p.M.HasValue)
+            {
+                if (p.Z.HasValue)
+                    return Esri.ArcGISRuntime.Geometry.MapPoint.CreateWithM(p.X, p.Y, p.Z.Value, p.M.Value, sr);
+                else
+                    return Esri.ArcGISRuntime.Geometry.MapPoint.CreateWithM(p.X, p.Y, p.M.Value, sr);
+            }
+            if (p.Z.HasValue)
+                return new Esri.ArcGISRuntime.Geometry.MapPoint(p.X, p.Y, p.Z.Value, sr);
+            else
+                return new Esri.ArcGISRuntime.Geometry.MapPoint(p.X, p.Y, sr);
+        }
 
 		private Esri.ArcGISRuntime.Geometry.Geometry ReadGeometryMultiPoint(System.Spatial.GeometryMultiPoint mpoint, Esri.ArcGISRuntime.Geometry.SpatialReference sr)
 		{

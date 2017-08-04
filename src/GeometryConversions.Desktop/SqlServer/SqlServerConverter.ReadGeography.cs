@@ -33,21 +33,27 @@ namespace GeometryConversions.SqlServer
 					throw new NotSupportedException(geography.STGeometryType().Value);
 			}			
 		}
-		
-		private static Esri.ArcGISRuntime.Geometry.MapPoint ReadGeographyPoint(Microsoft.SqlServer.Types.SqlGeography p, Esri.ArcGISRuntime.Geometry.SpatialReference sr)
-		{
-			return new Esri.ArcGISRuntime.Geometry.MapPoint(p.Long.Value, p.Lat.Value,
-				!p.Z.IsNull ? p.Z.Value : double.NaN,
-				!p.M.IsNull ? p.M.Value : double.NaN, sr);
+
+        private static Esri.ArcGISRuntime.Geometry.MapPoint ReadGeographyPoint(Microsoft.SqlServer.Types.SqlGeography p, Esri.ArcGISRuntime.Geometry.SpatialReference sr)
+        {
+            if (!p.M.IsNull)
+            {
+                if (!p.Z.IsNull)
+                    return Esri.ArcGISRuntime.Geometry.MapPoint.CreateWithM(p.Long.Value, p.Lat.Value, p.Z.Value, p.M.Value, sr);
+                else
+                    return Esri.ArcGISRuntime.Geometry.MapPoint.CreateWithM(p.Long.Value, p.Lat.Value, p.M.Value, sr);
+            }
+            if (!p.Z.IsNull)
+                return new Esri.ArcGISRuntime.Geometry.MapPoint(p.Long.Value, p.Lat.Value, p.Z.Value, sr);
+            else
+                return new Esri.ArcGISRuntime.Geometry.MapPoint(p.Long.Value, p.Lat.Value, sr);
 		}
 		
 		private static Esri.ArcGISRuntime.Geometry.Geometry ReadGeographyMultiPoint(Microsoft.SqlServer.Types.SqlGeography mpoint, Esri.ArcGISRuntime.Geometry.SpatialReference sr)
 		{
 			return new Esri.ArcGISRuntime.Geometry.Multipoint(
 				Utilities.CountEnumerator(mpoint.STNumPoints().Value).Select(i => mpoint.STPointN(i))
-					.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.Long.Value, p.Lat.Value,
-					!p.Z.IsNull ? p.Z.Value : double.NaN,
-					!p.M.IsNull ? p.M.Value : double.NaN))
+					.Select(p => ReadGeographyPoint(p, sr))
 			);
 		}
 
@@ -56,9 +62,7 @@ namespace GeometryConversions.SqlServer
 			return new Esri.ArcGISRuntime.Geometry.Polyline(
 				Utilities.CountEnumerator(line.STNumPoints().Value)
 					.Select(i => line.STPointN(i))
-					.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.Long.Value, p.Lat.Value,
-						!p.Z.IsNull ? p.Z.Value : double.NaN,
-						!p.M.IsNull ? p.M.Value : double.NaN))
+					.Select(p => ReadGeographyPoint(p, sr))
 			);
 		}
 
@@ -69,9 +73,7 @@ namespace GeometryConversions.SqlServer
 					.Select(i => mline.STGeometryN(i))
 					.SelectMany(line => Utilities.CountEnumerator(line.STNumPoints().Value)
 						.Select(i => line.STPointN(i))
-						.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.Long.Value, p.Lat.Value,
-							!p.Z.IsNull ? p.Z.Value : double.NaN,
-							!p.M.IsNull ? p.M.Value : double.NaN))));
+						.Select(p => ReadGeographyPoint(p, sr))));
 		}
 
 		private static Esri.ArcGISRuntime.Geometry.Geometry ReadGeographyPolygon(Microsoft.SqlServer.Types.SqlGeography poly, Esri.ArcGISRuntime.Geometry.SpatialReference sr)
@@ -80,9 +82,7 @@ namespace GeometryConversions.SqlServer
 				.Select(i => poly.RingN(i))
 				.Select(t => Utilities.CountEnumerator(t.STNumPoints().Value)
 					.Select(r => t.STPointN(r))
-					.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.Long.Value, p.Lat.Value,
-							!p.Z.IsNull ? p.Z.Value : double.NaN,
-							!p.M.IsNull ? p.M.Value : double.NaN)));
+					.Select(p => ReadGeographyPoint(p, sr)));
 
 
 			return new Esri.ArcGISRuntime.Geometry.Polygon(rings);
@@ -98,9 +98,7 @@ namespace GeometryConversions.SqlServer
 					.Select(i => poly.RingN(i))
 					.Select(t => Utilities.CountEnumerator(t.STNumPoints().Value)
 						.Select(r => t.STPointN(r))
-						.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.Long.Value, p.Lat.Value,
-								!p.Z.IsNull ? p.Z.Value : double.NaN,
-								!p.M.IsNull ? p.M.Value : double.NaN)));
+						.Select(p => ReadGeographyPoint(p, sr)));
 				rings.AddRange(innerRings);
 			}
 

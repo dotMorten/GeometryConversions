@@ -102,8 +102,8 @@ namespace UnitTests
 		public void SystemSpatialGeographyConvertPolygonToMultiPolygon()
 		{
 			PolygonBuilder pb = new PolygonBuilder(SpatialReferences.Wgs84);
-			pb.AddPart(new MapPoint[] { new MapPoint(0, 0), new MapPoint(1, 0), new MapPoint(1, 1) });
-			pb.AddPart(new MapPoint[] { new MapPoint(10, 10), new MapPoint(11, 10), new MapPoint(11, 11), new MapPoint(10, 11) });
+			pb.AddPart(new MapPoint[] { new MapPoint(0, 0), new MapPoint(1, 1), new MapPoint(1, 0)});
+			pb.AddPart(new MapPoint[] { new MapPoint(10, 10), new MapPoint(10, 11), new MapPoint(11, 11), new MapPoint(11, 10) });
 			var pl = pb.ToGeometry();
 			var g = pl.ToSystemSpatialGeography();
 			Assert.IsNotNull(g);

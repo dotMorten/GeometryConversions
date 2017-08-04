@@ -127,7 +127,18 @@ namespace GeometryConversions.Wkb
 			double Y = readDouble(reader, byteOrder);
 			double Z = ((uint)type > 1000 && (uint)type < 2000 || (int)type > 3000) ? readDouble(reader, byteOrder) : double.NaN;
 			double M = ((uint)type > 2000) ? readDouble(reader, byteOrder) : double.NaN;
-			return new MapPoint(X, Y, Z, M, spatialReference);
+            bool hasZ = ((uint)type > 1000 && (uint)type < 2000 || (int)type > 3000);
+            if ((uint)type > 2000) // HasM
+            {
+                if (hasZ)
+                    return Esri.ArcGISRuntime.Geometry.MapPoint.CreateWithM(X, Y, Z, M, spatialReference);
+                else
+                    return Esri.ArcGISRuntime.Geometry.MapPoint.CreateWithM(X, Y, M, spatialReference);
+            }
+            if (hasZ)
+                return new Esri.ArcGISRuntime.Geometry.MapPoint(X, Y, Z, spatialReference);
+            else
+                return new Esri.ArcGISRuntime.Geometry.MapPoint(X, Y, spatialReference);
 		}
 
 		private Polyline ReadWkbLineString(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)

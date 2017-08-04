@@ -116,7 +116,7 @@ namespace GeometryConversions.SqlServer
 			foreach (var outerRing in rings)
 			{
 				b.BeginGeography(Microsoft.SqlServer.Types.OpenGisGeographyType.Polygon);
-				CreateGeographyFigures(new Esri.ArcGISRuntime.Geometry.ReadOnlySegmentCollection[] { outerRing.Item1 }.Union(outerRing.Item2), b, true);
+				CreateGeographyFigures(new Esri.ArcGISRuntime.Geometry.ReadOnlyPart[] { outerRing.Item1 }.Union(outerRing.Item2), b, true);
 				b.EndGeography();
 			}
 
@@ -127,24 +127,25 @@ namespace GeometryConversions.SqlServer
 			return b.ConstructedGeography;
 		}
 		
-		private static void CreateGeographyFigures(IEnumerable<Esri.ArcGISRuntime.Geometry.ReadOnlySegmentCollection> parts,
+		private static void CreateGeographyFigures(IEnumerable<Esri.ArcGISRuntime.Geometry.ReadOnlyPart> parts,
 			Microsoft.SqlServer.Types.SqlGeographyBuilder b, bool close)
 		{
 			foreach (var part in parts)
 			{
 				if (part.Count == 0)
 					continue;
-				var p = part.GetPoint(0);
-				b.BeginFigure(p.Y, p.X,
-					p.HasZ ? (double?)p.Z : null,
-					p.HasM ? (double?)p.M : null);
-				for (int i = 1; i <= part.Count; i++)
+				var p = part.Points[0];
+				b.BeginFigure(p.Y, p.X, p.HasZ ? (double?)p.Z : null, p.HasM ? (double?)p.M : null);
+				for (int i = 1; i < part.Count; i++)
 				{
-					p = part.GetPoint(i);
-					b.AddLine(p.Y, p.X,
-					p.HasZ ? (double?)p.Z : null,
-					p.HasM ? (double?)p.M : null);
+					p = part.Points[i];
+					b.AddLine(p.Y, p.X, p.HasZ ? (double?)p.Z : null, p.HasM ? (double?)p.M : null);
 				}
+                if(close)
+                {
+                    p = part.Points[0];
+                    b.AddLine(p.X, p.Y, p.HasZ ? (double?)p.Z : null, p.HasM ? (double?)p.M : null);
+                }
 				b.EndFigure();
 			}
 		}

@@ -34,19 +34,25 @@ namespace GeometryConversions.SqlServer
 		}
 		
 		private static Esri.ArcGISRuntime.Geometry.MapPoint ReadGeometryPoint(Microsoft.SqlServer.Types.SqlGeometry p, Esri.ArcGISRuntime.Geometry.SpatialReference sr)
-		{
-			return new Esri.ArcGISRuntime.Geometry.MapPoint(p.STX.Value, p.STY.Value,
-				!p.Z.IsNull ? p.Z.Value : double.NaN,
-				!p.M.IsNull ? p.M.Value : double.NaN, sr);
+        {
+            if (!p.M.IsNull)
+            {
+                if (!p.Z.IsNull)
+                    return Esri.ArcGISRuntime.Geometry.MapPoint.CreateWithM(p.STX.Value, p.STY.Value, p.Z.Value, p.M.Value, sr);
+                else
+                    return Esri.ArcGISRuntime.Geometry.MapPoint.CreateWithM(p.STX.Value, p.STY.Value, p.M.Value, sr);
+            }
+            if (!p.Z.IsNull)
+                return new Esri.ArcGISRuntime.Geometry.MapPoint(p.STX.Value, p.STY.Value, p.Z.Value, sr);
+            else
+                return new Esri.ArcGISRuntime.Geometry.MapPoint(p.STX.Value, p.STY.Value, sr);
 		}
 		
 		private static Esri.ArcGISRuntime.Geometry.Geometry ReadGeometryMultiPoint(Microsoft.SqlServer.Types.SqlGeometry mpoint, Esri.ArcGISRuntime.Geometry.SpatialReference sr)
 		{
 			return new Esri.ArcGISRuntime.Geometry.Multipoint(
 				Utilities.CountEnumerator(mpoint.STNumPoints().Value).Select(i => mpoint.STPointN(i))
-					.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.STX.Value, p.STY.Value,
-					!p.Z.IsNull ? p.Z.Value : double.NaN,
-					!p.M.IsNull ? p.M.Value : double.NaN))
+					.Select(p => ReadGeometryPoint(p, sr))
 			);
 		}
 
@@ -55,9 +61,7 @@ namespace GeometryConversions.SqlServer
 			return new Esri.ArcGISRuntime.Geometry.Polyline(
 				Utilities.CountEnumerator(line.STNumPoints().Value)
 					.Select(i => line.STPointN(i))
-					.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.STX.Value, p.STY.Value,
-						!p.Z.IsNull ? p.Z.Value : double.NaN,
-						!p.M.IsNull ? p.M.Value : double.NaN))
+					.Select(p => ReadGeometryPoint(p, sr))
 			);
 		}
 
@@ -68,25 +72,19 @@ namespace GeometryConversions.SqlServer
 					.Select(i => mline.STGeometryN(i))
 					.SelectMany(line => Utilities.CountEnumerator(line.STNumPoints().Value)
 						.Select(i => line.STPointN(i))
-						.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.STX.Value, p.STY.Value,
-							!p.Z.IsNull ? p.Z.Value : double.NaN,
-							!p.M.IsNull ? p.M.Value : double.NaN))));
+						.Select(p => ReadGeometryPoint(p, sr))));
 		}
 
 		private static Esri.ArcGISRuntime.Geometry.Geometry ReadGeometryPolygon(Microsoft.SqlServer.Types.SqlGeometry poly, Esri.ArcGISRuntime.Geometry.SpatialReference sr)
 		{
 			var outerRing = Utilities.CountEnumerator(poly.STExteriorRing().STNumPoints().Value)
 				.Select(i => poly.STExteriorRing().STPointN(i))
-				.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.STX.Value, p.STY.Value,
-					!p.Z.IsNull ? p.Z.Value : double.NaN,
-					!p.M.IsNull ? p.M.Value : double.NaN));
+				.Select(p => ReadGeometryPoint(p, sr));
 			var innerRings = Utilities.CountEnumerator(poly.STNumInteriorRing().Value)
 				.Select(i => poly.STInteriorRingN(i))
 				.Select(t => Utilities.CountEnumerator(t.STNumPoints().Value)
 					.Select(r => t.STPointN(r))
-					.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.STX.Value, p.STY.Value,
-							!p.Z.IsNull ? p.Z.Value : double.NaN,
-							!p.M.IsNull ? p.M.Value : double.NaN)));
+					.Select(p => ReadGeometryPoint(p, sr)));
 
 
 			return new Esri.ArcGISRuntime.Geometry.Polygon( new List<IEnumerable<Esri.ArcGISRuntime.Geometry.MapPoint>>() { outerRing }.Union(innerRings));
@@ -100,17 +98,13 @@ namespace GeometryConversions.SqlServer
 				var poly = mpoly.STGeometryN(j);
 				var outerRing = Utilities.CountEnumerator(poly.STExteriorRing().STNumPoints().Value)
 				.Select(i => poly.STExteriorRing().STPointN(i))
-				.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.STX.Value, p.STY.Value,
-					!p.Z.IsNull ? p.Z.Value : double.NaN,
-					!p.M.IsNull ? p.M.Value : double.NaN));
+				.Select(p => ReadGeometryPoint(p, sr));
 				rings.AddRange(rings);
 				var innerRings = Utilities.CountEnumerator(poly.STNumInteriorRing().Value)
 					.Select(i => poly.STInteriorRingN(i))
 					.Select(t => Utilities.CountEnumerator(t.STNumPoints().Value)
 						.Select(r => t.STPointN(r))
-						.Select(p => new Esri.ArcGISRuntime.Geometry.MapPoint(p.STX.Value, p.STY.Value,
-								!p.Z.IsNull ? p.Z.Value : double.NaN,
-								!p.M.IsNull ? p.M.Value : double.NaN)));
+						.Select(p => ReadGeometryPoint(p, sr)));
 				rings.AddRange(innerRings);
 			}
 

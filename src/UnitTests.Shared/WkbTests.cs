@@ -27,8 +27,8 @@ namespace UnitTests
 			var mp2 = (MapPoint)geom;
 			Assert.AreEqual(12, mp2.X);
 			Assert.AreEqual(34, mp2.Y);
-			Assert.IsTrue(double.IsNaN(mp2.Z));
-			Assert.IsTrue(double.IsNaN(mp2.M));
+			Assert.IsFalse(mp2.HasZ);
+			Assert.IsFalse(mp2.HasM);
 		}
 		[TestMethod]
 		public void WkbConvertMapPointToFromXYZ()
@@ -42,12 +42,12 @@ namespace UnitTests
 			Assert.AreEqual(12, mp2.X);
 			Assert.AreEqual(34, mp2.Y);
 			Assert.AreEqual(56, mp2.Z);
-			Assert.IsTrue(double.IsNaN(mp2.M));
-		}
+            Assert.IsFalse(mp2.HasM);
+        }
 		[TestMethod]
 		public void WkbConvertMapPointToFromXYM()
 		{
-			MapPoint mp = new MapPoint(12, 34, double.NaN, 56, SpatialReferences.Wgs84);
+			MapPoint mp = MapPoint.CreateWithM(12, 34, 56, SpatialReferences.Wgs84);
 			byte[] bytes = mp.ToWellKnownBinary();
 			var geom = bytes.FromWellKnownBinary(mp.SpatialReference);
 			Assert.IsNotNull(geom);
@@ -56,14 +56,14 @@ namespace UnitTests
 			var mp2 = (MapPoint)geom;
 			Assert.AreEqual(12, mp2.X);
 			Assert.AreEqual(34, mp2.Y);
-			Assert.IsTrue(double.IsNaN(mp2.Z));
-			Assert.AreEqual(56, mp2.M);
+            Assert.IsFalse(mp2.HasZ);
+            Assert.AreEqual(56, mp2.M);
 		}
 
         [TestMethod]
 		public void WkbConvertMapPointToFromXYZM()
         {
-			MapPoint mp = new MapPoint(12, 34, 56, 78);
+			MapPoint mp = MapPoint.CreateWithM(12, 34, 56, 78);
 			byte[] bytes = mp.ToWellKnownBinary();
 			var geom = bytes.FromWellKnownBinary();
 			Assert.IsNotNull(geom);

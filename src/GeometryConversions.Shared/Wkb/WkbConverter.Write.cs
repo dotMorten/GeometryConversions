@@ -87,7 +87,7 @@ namespace GeometryConversions.Wkb
 
 		private void WriteLineString(Polyline ls, BinaryWriter bWriter, bool includeZ, bool includeM)
 		{
-			WriteCoordinateCollection(ls.Parts[0].GetPoints().ToList(), bWriter, includeZ, includeM);
+			WriteCoordinateCollection(ls.Parts[0].Points.ToList(), bWriter, includeZ, includeM);
 		}
 
 
@@ -103,7 +103,7 @@ namespace GeometryConversions.Wkb
 				bWriter.Write((byte)this.wkbByteOrder);
 				WriteUInt32((uint)WkbGeometryType.wkbLineString, bWriter);
 				//Write each linestring.
-				WriteCoordinateCollection(ls.GetPoints().ToList(), bWriter, includeZ, includeM);
+				WriteCoordinateCollection(ls.Points.ToList(), bWriter, includeZ, includeM);
 			}
 		}
 		
@@ -125,7 +125,7 @@ namespace GeometryConversions.Wkb
 		}
 		private void WritePolygon(Polygon poly, BinaryWriter bWriter, bool includeZ, bool includeM)
 		{
-			WritePolygonRings(new Tuple<ReadOnlySegmentCollection, IList<ReadOnlySegmentCollection>>(poly.Parts[0], new List<ReadOnlySegmentCollection>()), bWriter, includeZ, includeM);			
+			WritePolygonRings(new Tuple<ReadOnlyPart, IList<ReadOnlyPart>>(poly.Parts[0], new List<ReadOnlyPart>()), bWriter, includeZ, includeM);			
 		}
 		private void WriteMultiPolygon(Polygon mp, BinaryWriter bWriter, bool includeZ, bool includeM)
 		{
@@ -144,7 +144,7 @@ namespace GeometryConversions.Wkb
 			}
 		}
 
-		private void WritePolygonRings(Tuple<ReadOnlySegmentCollection, IList<ReadOnlySegmentCollection>> poly, BinaryWriter bWriter, bool includeZ, bool includeM)
+		private void WritePolygonRings(Tuple<ReadOnlyPart, IList<ReadOnlyPart>> poly, BinaryWriter bWriter, bool includeZ, bool includeM)
 		{
 			//Get the number of rings in this polygon.
 			int numRings = poly.Item2.Count + 1;
@@ -153,12 +153,12 @@ namespace GeometryConversions.Wkb
 			WriteUInt32((uint)numRings, bWriter);
 
 			//Write the exterior of this polygon.
-			WriteCoordinateCollection(poly.Item1.GetPoints().ToList(), bWriter, includeZ, includeM);
+			WriteCoordinateCollection(poly.Item1.Points.ToList(), bWriter, includeZ, includeM);
 
 			//Loop on the number of rings - 1 because we already wrote the shell.
 			foreach (var lr in poly.Item2)
 				//Write the (lineString)LinearRing.
-				WriteCoordinateCollection(lr.GetPoints().ToList(), bWriter, includeZ, includeM);
+				WriteCoordinateCollection(lr.Points.ToList(), bWriter, includeZ, includeM);
 		}
 
 		/*private void writeGeometryCollection(GeometryCollection gc, BinaryWriter bWriter, bool includeZ, bool includeM)

@@ -69,7 +69,7 @@ namespace GeometryConversions.SystemSpatial
 			if (cs != null)
 				b.GeometryPipeline.SetCoordinateSystem(cs);
 			b.GeometryPipeline.BeginGeometry(
-				polyline.Parts.Count <= 1 ?
+				polyline.Parts.Count < 2 ?
 				System.Spatial.SpatialType.LineString :
 				System.Spatial.SpatialType.MultiLineString);
 
@@ -95,7 +95,9 @@ namespace GeometryConversions.SystemSpatial
 			foreach (var outerRing in rings)
 			{
 				b.GeometryPipeline.BeginGeometry(System.Spatial.SpatialType.Polygon);
-				CreateGeometryFigures(new Esri.ArcGISRuntime.Geometry.ReadOnlySegmentCollection[] { outerRing.Item1 }.Union(outerRing.Item2), b, true);
+                var figure = new Esri.ArcGISRuntime.Geometry.ReadOnlyPart[] { outerRing.Item1 }.Union(outerRing.Item2);
+
+                CreateGeometryFigures(figure, b, true);
 				b.GeometryPipeline.EndGeometry();
 			}
 
@@ -107,20 +109,20 @@ namespace GeometryConversions.SystemSpatial
 		}
 
 
-		private static void CreateGeometryFigures(IEnumerable<Esri.ArcGISRuntime.Geometry.ReadOnlySegmentCollection> parts,
+		private static void CreateGeometryFigures(IEnumerable<Esri.ArcGISRuntime.Geometry.ReadOnlyPart> parts,
 			System.Spatial.SpatialBuilder b, bool close)
 		{
 			foreach (var part in parts)
 			{
 				if (part.Count == 0)
 					continue;
-				b.GeometryPipeline.BeginFigure(ToGeometryPosition(part.GetPoint(0)));
-				for (int i = 1; i <= part.Count; i++)
+				b.GeometryPipeline.BeginFigure(ToGeometryPosition(part.Points[0]));
+				for (int i = 1; i < part.Points.Count; i++)
 				{
-					b.GeometryPipeline.LineTo(ToGeometryPosition(part.GetPoint(i)));
+					b.GeometryPipeline.LineTo(ToGeometryPosition(part.Points[i]));
 				}
-				//if(close)
-				//	b.GeometryPipeline.LineTo(ToGeometryPosition(part.GetPoint(0)));
+				if(close)
+					b.GeometryPipeline.LineTo(ToGeometryPosition(part.Points[0]));
 				b.GeometryPipeline.EndFigure();
 			}
 		}
