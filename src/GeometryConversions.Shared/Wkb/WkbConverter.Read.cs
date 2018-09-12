@@ -150,14 +150,21 @@ namespace GeometryConversions.Wkb
 		{
 			// Get the Number of rings in this Polygon.
 			int numRings = (int)readUInt32(reader, byteOrder);
-			return new Polygon(CoordinateCollectionEnumerator(numRings + 1, reader, byteOrder, type, null), spatialReference);
+		    List<IEnumerable<MapPoint>> rings = new List<IEnumerable<MapPoint>>();
+		    foreach (var ring in CoordinateCollectionEnumerator(numRings, reader, byteOrder, type, null))
+		    {
+		        rings.Add(new List<MapPoint>(ring));
+		    }
+			return new Polygon(rings, spatialReference);
 			
 		}
+
 		IEnumerable<IEnumerable<MapPoint>> CoordinateCollectionEnumerator(int count, BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
 		{
 			for(int i=0;i<count;i++)
 				yield return ReadCoordinates(reader, byteOrder, type, spatialReference);
 		}
+
 		private Multipoint ReadWkbMultiPoint(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
 		{
 			// Get the number of points in this multipoint.
@@ -225,7 +232,10 @@ namespace GeometryConversions.Wkb
 				// TODO: Validate type
 
 				int numRings = (int)readUInt32(reader, byteOrder);
-				rings.AddRange(CoordinateCollectionEnumerator(numRings + 1, reader, byteOrder, type, spatialReference));
+			    foreach (var ring in CoordinateCollectionEnumerator(numRings, reader, byteOrder, type, spatialReference))
+			    {
+			        rings.Add(new List<MapPoint>(ring));
+			    }
 			}
 
 			//Create and return the MultiPolygon.
