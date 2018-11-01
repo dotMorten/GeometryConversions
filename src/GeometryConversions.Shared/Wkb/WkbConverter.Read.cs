@@ -150,13 +150,12 @@ namespace GeometryConversions.Wkb
 		{
 			// Get the Number of rings in this Polygon.
 			int numRings = (int)readUInt32(reader, byteOrder);
-		    List<IEnumerable<MapPoint>> rings = new List<IEnumerable<MapPoint>>();
-		    foreach (var ring in CoordinateCollectionEnumerator(numRings, reader, byteOrder, type, null))
-		    {
-		        rings.Add(new List<MapPoint>(ring));
-		    }
+			List<IEnumerable<MapPoint>> rings = new List<IEnumerable<MapPoint>>();
+			foreach (var ring in CoordinateCollectionEnumerator(numRings, reader, byteOrder, type, null))
+			{
+				rings.Add(new List<MapPoint>(ring));
+			}
 			return new Polygon(rings, spatialReference);
-			
 		}
 
 		IEnumerable<IEnumerable<MapPoint>> CoordinateCollectionEnumerator(int count, BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
@@ -186,7 +185,6 @@ namespace GeometryConversions.Wkb
 				points.Add(ReadWkbPoint(reader, byteOrder, type, null));
 			}
 			return new Multipoint(points, spatialReference);
-			
 		}
 
 		private Polyline ReadWkbMultiLineString(BinaryReader reader, WkbByteOrder byteOrder, WkbGeometryType type, SpatialReference spatialReference)
