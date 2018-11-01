@@ -230,10 +230,10 @@ namespace GeometryConversions.Wkb
 				// TODO: Validate type
 
 				int numRings = (int)readUInt32(reader, byteOrder);
-			    foreach (var ring in CoordinateCollectionEnumerator(numRings, reader, byteOrder, type, spatialReference))
-			    {
-			        rings.Add(new List<MapPoint>(ring));
-			    }
+				foreach (var ring in CoordinateCollectionEnumerator(numRings, reader, byteOrder, type, spatialReference))
+				{
+					rings.Add(new List<MapPoint>(ring));
+				}
 			}
 
 			//Create and return the MultiPolygon.
